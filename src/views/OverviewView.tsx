@@ -1,8 +1,4 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
-import { IconShell } from '@/components/ui/icon-shell';
 import {
   Statistic,
   StatisticLabel,
@@ -10,7 +6,6 @@ import {
 } from '@/components/ui/statistic';
 import { AgentRoster } from '@/components/workbench/AgentRoster';
 import { relativeTime } from '@/lib/time';
-import { inquiryIcon } from '@/lib/meta';
 import { agentById } from '@/data/agents';
 import type { Agent, ActivityEvent, Inquiry } from '@/types/domain';
 
@@ -44,11 +39,11 @@ export function OverviewView({
     .slice(0, 5);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1120px] gap-8 px-8 py-8">
-      <div className="flex min-w-0 flex-1 flex-col gap-8">
-        <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto flex w-full max-w-[1120px] gap-16 px-8 py-14">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="mb-10 flex items-start justify-between gap-4">
           <div>
-            <h1 className="headings-h2-semibold text-fg-primary">At a glance</h1>
+            <h1 className="headings-h2-regular text-fg-primary">At a glance</h1>
             <p className="paragraph-regular-primary text-fg-secondary mt-1">
               What you're currently working on, what has changed, and what may need you.
             </p>
@@ -58,7 +53,7 @@ export function OverviewView({
           </Button>
         </div>
 
-        <div className="flex gap-8">
+        <div className="mb-14 flex gap-10">
           <Statistic size="sm">
             <StatisticLabel>Worked on today</StatisticLabel>
             <StatisticValue value={tasksCompletedToday} />
@@ -73,62 +68,43 @@ export function OverviewView({
           </Statistic>
         </div>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="headings-h4-semibold text-fg-primary">
+        <section className="mb-14">
+          <h2 className="headings-h4-regular text-fg-primary mb-4">
             Needs your attention
           </h2>
 
           {needsAttention.length === 0 ? (
-            <Card size="sm">
-              <CardContent className="py-6">
-                <p className="paragraph-regular-primary text-fg-secondary">
-                  Nothing needs you right now. Heph is working through your ideas
-                  on its own.
-                </p>
-              </CardContent>
-            </Card>
+            <p className="paragraph-regular-primary text-fg-tertiary">
+              Nothing needs you right now. Heph is working through your ideas on its own.
+            </p>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div>
               {needsAttention.map(item => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => onOpenInquiry(item.id)}
-                  className="text-left">
-                  <Card
-                    size="sm"
-                    className="hover:border-stroke-tertiary-hover border border-transparent transition-colors">
-                    <CardContent className="flex items-start gap-3 py-4">
-                      <IconShell type="neutral" size="default" className="mt-0.5">
-                        <Icon icon={inquiryIcon} />
-                      </IconShell>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="label-regular-primary text-fg-primary truncate">
-                            {item.proposition}
-                          </span>
-                          <Badge variant="alternative" size="sm">
-                            Ready for you
-                          </Badge>
-                        </div>
-                        <p className="paragraph-small-primary text-fg-secondary mt-1 line-clamp-2">
-                          {item.reframe.strengthened}
-                        </p>
-                      </div>
-                      <span className="paragraph-small-primary text-fg-tertiary shrink-0">
-                        {relativeTime(item.createdAt)}
-                      </span>
-                    </CardContent>
-                  </Card>
+                  className="border-stroke-divider hover:bg-stateslayer-overlay-hover flex w-full items-start gap-4 border-t py-5 text-left transition-colors first:border-t-0">
+                  <div className="min-w-0 flex-1">
+                    <p className="paragraph-large-primary text-fg-primary">
+                      {item.proposition}
+                    </p>
+                    <p className="paragraph-small-primary text-fg-secondary mt-1 line-clamp-2">
+                      {item.reframe.strengthened}
+                    </p>
+                  </div>
+                  <span className="paragraph-small-primary text-fg-tertiary shrink-0">
+                    {relativeTime(item.createdAt)}
+                  </span>
                 </button>
               ))}
             </div>
           )}
         </section>
 
-        <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="headings-h4-semibold text-fg-primary">
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="headings-h4-regular text-fg-primary">
               Since you last checked
             </h2>
             <Button variant="ghost" size="sm" onClick={onGoToActivity}>
@@ -136,42 +112,32 @@ export function OverviewView({
             </Button>
           </div>
 
-          <Card size="sm">
-            <CardContent className="gap-0 py-2">
-              <ul className="flex flex-col">
-                {significantActivity.map((event, index) => (
-                  <li
-                    key={event.id}
-                    className="flex items-start gap-3 py-3"
-                    style={{
-                      borderTop:
-                        index === 0 ? undefined : '1px solid var(--border-divider)',
-                    }}>
-                    <div className="min-w-0 flex-1">
-                      <p className="paragraph-regular-primary text-fg-primary">
-                        <span className="font-semibold">
-                          {event.type === 'human-decision' ? 'You' : agentById.get(event.agentId)?.name}
-                        </span>{' '}
-                        {event.summary.charAt(0).toLowerCase() + event.summary.slice(1)}
-                      </p>
-                      {event.detail && (
-                        <p className="paragraph-small-primary text-fg-secondary mt-0.5">
-                          {event.detail}
-                        </p>
-                      )}
-                    </div>
-                    <span className="paragraph-small-primary text-fg-tertiary shrink-0">
-                      {relativeTime(event.timestamp)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <div>
+            {significantActivity.map(event => (
+              <div key={event.id} className="border-stroke-divider flex items-start gap-3 border-t py-4 first:border-t-0">
+                <div className="min-w-0 flex-1">
+                  <p className="paragraph-regular-primary text-fg-primary">
+                    <span className="font-semibold">
+                      {event.type === 'human-decision' ? 'You' : agentById.get(event.agentId)?.name}
+                    </span>{' '}
+                    {event.summary.charAt(0).toLowerCase() + event.summary.slice(1)}
+                  </p>
+                  {event.detail && (
+                    <p className="paragraph-small-primary text-fg-secondary mt-0.5">
+                      {event.detail}
+                    </p>
+                  )}
+                </div>
+                <span className="paragraph-small-primary text-fg-tertiary shrink-0">
+                  {relativeTime(event.timestamp)}
+                </span>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
 
-      <aside className="w-[320px] shrink-0">
+      <aside className="w-[280px] shrink-0">
         <AgentRoster agents={agents} />
       </aside>
     </div>

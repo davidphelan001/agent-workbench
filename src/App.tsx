@@ -14,8 +14,8 @@ import {
   type InquiryInput,
 } from '@/lib/inquiryGenerator';
 import { ActivityView } from '@/views/ActivityView';
-import { AuditView } from '@/views/AuditView';
 import { IdeaListView } from '@/views/IdeaListView';
+import { IdeasView } from '@/views/IdeasView';
 import { OverviewView } from '@/views/OverviewView';
 import type { ActivityEvent, Agent, AgentId, Inquiry } from '@/types/domain';
 
@@ -301,11 +301,14 @@ export default function App() {
           />
         )}
         {view === 'inquiries' && (
-          <IdeaListView
-            scope="all"
+          <IdeasView
             inquiries={inquiries}
             selectedId={selectedInquiryId}
             onSelect={setSelectedInquiryId}
+            onStartInquiry={() => {
+              setRevisionSeed(undefined);
+              setInquiryDialogOpen(true);
+            }}
             onAccept={handleAccept}
             onChallenge={handleChallenge}
             onGoDeeper={handleGoDeeper}
@@ -330,10 +333,16 @@ export default function App() {
           <ActivityView activity={activity} onOpenInquiry={openInquiry} />
         )}
         {view === 'audit' && (
-          <AuditView
+          <IdeaListView
+            scope="history"
             inquiries={inquiries}
             selectedId={selectedInquiryId}
             onSelect={setSelectedInquiryId}
+            onAccept={handleAccept}
+            onChallenge={handleChallenge}
+            onGoDeeper={handleGoDeeper}
+            onAskForEvidence={handleAskForEvidence}
+            onReviseProposition={handleReviseProposition}
           />
         )}
       </main>
