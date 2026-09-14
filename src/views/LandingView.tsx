@@ -20,6 +20,13 @@ export function LandingView({ onExplore }: LandingViewProps) {
   // the button starts trailing the cursor from then on.
   const [mode, setMode] = useState<ButtonMode>({ kind: 'flow' });
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  // While the cursor is actively approaching, every mousemove restarts the
+  // button's 300ms CSS transition toward a new target — so a click that
+  // lands mid-glide can have its mousedown and mouseup resolve to different
+  // positions and never fire. Freezing the target the instant the cursor
+  // enters the button (a standard "magnetic button" pattern) makes it a
+  // stable, reliably clickable target from that point on.
+  const isHoveringButtonRef = useRef(false);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -33,6 +40,7 @@ export function LandingView({ onExplore }: LandingViewProps) {
   }
 
   function handleMouseMove(e: React.MouseEvent) {
+    if (isHoveringButtonRef.current) return;
     setMode({ kind: 'follow', x: e.clientX, y: e.clientY });
   }
 
@@ -53,7 +61,7 @@ export function LandingView({ onExplore }: LandingViewProps) {
       )}>
       <video
         ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
         src="/videos/hephwerk-hero.mp4"
         autoPlay
         loop
@@ -62,10 +70,11 @@ export function LandingView({ onExplore }: LandingViewProps) {
         aria-hidden
       />
       {/* Scrim guarantees the wordmark/button stay legible regardless of the
-          video's own brightness/content. */}
-      <div className="absolute inset-0 bg-black/45" />
+          video's own brightness/content. pointer-events-none so it can never
+          sit in front of the button and swallow a click. */}
+      <div className="pointer-events-none absolute inset-0 z-0 bg-black/45" />
 
-      <div className="relative flex h-full flex-col items-center justify-center gap-9">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-9">
         <h1 className="font-headings text-[clamp(3rem,9vw,7rem)] leading-none font-normal tracking-[-0.02em] text-white">
           Hephwerk
         </h1>
@@ -73,6 +82,12 @@ export function LandingView({ onExplore }: LandingViewProps) {
         <button
           type="button"
           onClick={handleExplore}
+          onMouseEnter={() => {
+            isHoveringButtonRef.current = true;
+          }}
+          onMouseLeave={() => {
+            isHoveringButtonRef.current = false;
+          }}
           style={
             mode.kind === 'follow'
               ? {
@@ -84,8 +99,8 @@ export function LandingView({ onExplore }: LandingViewProps) {
               : undefined
           }
           className={cn(
-            'label-regular-primary flex items-center gap-1.5 rounded-full px-5 py-2.5 text-black backdrop-blur-md will-change-transform',
-            'bg-[rgba(150,150,150,0.4)] hover:bg-[rgba(150,150,150,0.55)]',
+            'label-regular-primary relative z-20 flex items-center gap-1.5 rounded-full px-5 py-2.5 text-black backdrop-blur-md will-change-transform',
+            'pointer-events-auto cursor-pointer bg-[rgba(150,150,150,0.4)] hover:bg-[rgba(150,150,150,0.55)]',
             // A single transition-property list, not two stacked transition-*
             // utilities — those would fight over the same CSS property and
             // only one could win.
