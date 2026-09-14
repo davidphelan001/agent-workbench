@@ -11,6 +11,7 @@ import type { ActivityEvent } from '@/types/domain';
 interface ActivityViewProps {
   activity: ActivityEvent[];
   onOpenDecision: (id: string) => void;
+  onOpenInquiry: (id: string) => void;
 }
 
 const significantTypes = new Set([
@@ -27,7 +28,7 @@ const eventToneClass: Record<string, string> = {
   'human-decision': 'text-fg-primary',
 };
 
-export function ActivityView({ activity, onOpenDecision }: ActivityViewProps) {
+export function ActivityView({ activity, onOpenDecision, onOpenInquiry }: ActivityViewProps) {
   const [filter, setFilter] = useState<'all' | 'significant'>('all');
 
   const sorted = [...activity].sort(
@@ -102,6 +103,14 @@ export function ActivityView({ activity, onOpenDecision }: ActivityViewProps) {
                     onClick={() => onOpenDecision(event.relatedDecisionId!)}
                     className="paragraph-small-primary-link text-fg-secondary mt-1 cursor-pointer">
                     View decision
+                  </button>
+                )}
+                {event.relatedInquiryId && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenInquiry(event.relatedInquiryId!)}
+                    className="paragraph-small-primary-link text-fg-secondary mt-1 cursor-pointer">
+                    View inquiry
                   </button>
                 )}
               </div>

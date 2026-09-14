@@ -16,6 +16,7 @@ interface NavRailProps {
   onSelect: (view: View) => void;
   queueCount: number;
   disagreementCount: number;
+  inquiryCount: number;
 }
 
 export function NavRail({
@@ -23,9 +24,16 @@ export function NavRail({
   onSelect,
   queueCount,
   disagreementCount,
+  inquiryCount,
 }: NavRailProps) {
   const items: NavItem[] = [
     { id: 'overview', label: 'Overview', icon: 'grid_view' },
+    {
+      id: 'inquiries',
+      label: 'Inquiries',
+      icon: 'psychology',
+      count: inquiryCount,
+    },
     {
       id: 'queue',
       label: 'Judgement queue',

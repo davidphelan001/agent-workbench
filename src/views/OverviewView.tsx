@@ -10,17 +10,19 @@ import {
 } from '@/components/ui/statistic';
 import { AgentRoster } from '@/components/workbench/AgentRoster';
 import { relativeTime } from '@/lib/time';
-import { categoryIcon } from '@/lib/meta';
+import { categoryIcon, inquiryIcon } from '@/lib/meta';
 import { agentById } from '@/data/agents';
-import type { Agent, ActivityEvent, Decision } from '@/types/domain';
+import type { Agent, ActivityEvent, Decision, Inquiry } from '@/types/domain';
 
 interface OverviewViewProps {
   agents: Agent[];
   decisions: Decision[];
+  inquiries: Inquiry[];
   activity: ActivityEvent[];
   onOpenDecision: (id: string) => void;
+  onOpenInquiry: (id: string) => void;
   onGoToActivity: () => void;
-  onStartWork: () => void;
+  onStartInquiry: () => void;
 }
 
 const significantTypes = new Set([
@@ -30,21 +32,61 @@ const significantTypes = new Set([
   'uncertainty',
 ]);
 
+interface AttentionItem {
+  id: string;
+  kind: 'decision' | 'inquiry';
+  icon: string;
+  title: string;
+  summary: string;
+  createdAt: string;
+  urgent: boolean;
+  badge?: string;
+}
+
 export function OverviewView({
   agents,
   decisions,
+  inquiries,
   activity,
   onOpenDecision,
+  onOpenInquiry,
   onGoToActivity,
-  onStartWork,
+  onStartInquiry,
 }: OverviewViewProps) {
-  const needsAttention = decisions
-    .filter(d => d.status === 'pending' || d.status === 'info-requested')
-    .sort((a, b) => {
-      const aUrgent = a.disagreement ? 0 : 1;
-      const bUrgent = b.disagreement ? 0 : 1;
-      return aUrgent - bUrgent;
-    });
+  const pendingDecisions = decisions.filter(
+    d => d.status === 'pending' || d.status === 'info-requested',
+  );
+  const readyInquiries = inquiries.filter(i => i.status === 'ready');
+
+  const needsAttention: AttentionItem[] = [
+    ...pendingDecisions.map(d => ({
+      id: d.id,
+      kind: 'decision' as const,
+      icon: categoryIcon[d.category],
+      title: d.title,
+      summary: d.summary,
+      createdAt: d.createdAt,
+      urgent: Boolean(d.disagreement),
+      badge: d.disagreement
+        ? 'Agents disagree'
+        : d.status === 'info-requested'
+          ? 'Awaiting information'
+          : undefined,
+    })),
+    ...readyInquiries.map(i => ({
+      id: i.id,
+      kind: 'inquiry' as const,
+      icon: inquiryIcon,
+      title: i.proposition,
+      summary: i.reframe.strengthened,
+      createdAt: i.createdAt,
+      urgent: false,
+      badge: 'Ready for you',
+    })),
+  ].sort((a, b) => {
+    if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   const blockedAgents = agents.filter(a => a.status === 'blocked' || a.status === 'uncertain');
   const tasksCompletedToday = agents.reduce((sum, a) => sum + a.tasksCompletedToday, 0);
@@ -62,8 +104,8 @@ export function OverviewView({
               What the organisation is doing, and what actually needs you right now.
             </p>
           </div>
-          <Button onClick={onStartWork} className="shrink-0">
-            Start new work
+          <Button onClick={onStartInquiry} className="shrink-0">
+            New inquiry
           </Button>
         </div>
 
@@ -73,7 +115,7 @@ export function OverviewView({
             <StatisticValue value={tasksCompletedToday} />
           </Statistic>
           <Statistic size="sm">
-            <StatisticLabel>Awaiting your judgement</StatisticLabel>
+            <StatisticLabel>Waiting on you</StatisticLabel>
             <StatisticValue value={needsAttention.length} />
           </Statistic>
           <Statistic size="sm">
@@ -98,41 +140,38 @@ export function OverviewView({
             </Card>
           ) : (
             <div className="flex flex-col gap-2">
-              {needsAttention.map(decision => (
+              {needsAttention.map(item => (
                 <button
-                  key={decision.id}
+                  key={item.id}
                   type="button"
-                  onClick={() => onOpenDecision(decision.id)}
+                  onClick={() =>
+                    item.kind === 'decision' ? onOpenDecision(item.id) : onOpenInquiry(item.id)
+                  }
                   className="text-left">
                   <Card
                     size="sm"
                     className="hover:border-stroke-tertiary-hover border border-transparent transition-colors">
                     <CardContent className="flex items-start gap-3 py-4">
                       <IconShell type="neutral" size="default" className="mt-0.5">
-                        <Icon icon={categoryIcon[decision.category]} />
+                        <Icon icon={item.icon} />
                       </IconShell>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="label-regular-primary text-fg-primary">
-                            {decision.title}
+                          <span className="label-regular-primary text-fg-primary truncate">
+                            {item.title}
                           </span>
-                          {decision.disagreement && (
-                            <Badge variant="warning" size="sm">
-                              Agents disagree
-                            </Badge>
-                          )}
-                          {decision.status === 'info-requested' && (
-                            <Badge variant="alternative" size="sm">
-                              Awaiting information
+                          {item.badge && (
+                            <Badge variant={item.urgent ? 'warning' : 'alternative'} size="sm">
+                              {item.badge}
                             </Badge>
                           )}
                         </div>
-                        <p className="paragraph-small-primary text-fg-secondary mt-1">
-                          {decision.summary}
+                        <p className="paragraph-small-primary text-fg-secondary mt-1 line-clamp-2">
+                          {item.summary}
                         </p>
                       </div>
                       <span className="paragraph-small-primary text-fg-tertiary shrink-0">
-                        {relativeTime(decision.createdAt)}
+                        {relativeTime(item.createdAt)}
                       </span>
                     </CardContent>
                   </Card>

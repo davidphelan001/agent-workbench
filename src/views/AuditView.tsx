@@ -2,14 +2,16 @@ import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { IconShell } from '@/components/ui/icon-shell';
 import { DecisionDetail } from '@/components/workbench/DecisionDetail';
+import { InquiryDetail } from '@/components/workbench/InquiryDetail';
 import { agentById } from '@/data/agents';
-import { categoryIcon } from '@/lib/meta';
+import { categoryIcon, inquiryIcon } from '@/lib/meta';
 import { relativeTime } from '@/lib/time';
 import { cn } from '@/lib/utils';
-import type { AgentId, Decision } from '@/types/domain';
+import type { AgentId, Decision, Inquiry } from '@/types/domain';
 
 interface AuditViewProps {
   decisions: Decision[];
+  inquiries: Inquiry[];
   selectedId: string | null;
   onSelect: (id: string) => void;
 }
@@ -17,6 +19,12 @@ interface AuditViewProps {
 const noop = () => {};
 const noopInfo = (_id: string, _note: string) => {};
 const noopSide = (_id: string, _agentId: AgentId, _note?: string) => {};
+const noopChallenge = (_id: string, _note: string) => {};
+const noopRevise = (_proposition: string) => {};
+
+type AuditItem =
+  | { kind: 'decision'; id: string; data: Decision; resolvedAt: string }
+  | { kind: 'inquiry'; id: string; data: Inquiry; resolvedAt: string };
 
 function outcomeBadge(decision: Decision) {
   if (decision.status === 'rejected') {
@@ -47,20 +55,28 @@ function outcomeBadge(decision: Decision) {
   );
 }
 
-export function AuditView({ decisions, selectedId, onSelect }: AuditViewProps) {
-  const resolved = decisions
-    .filter(
-      d =>
-        d.status === 'approved' ||
-        d.status === 'rejected' ||
-        d.status === 'resolved-auto',
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.resolvedAt ?? b.createdAt).getTime() -
-        new Date(a.resolvedAt ?? a.createdAt).getTime(),
-    );
-  const selected = resolved.find(d => d.id === selectedId) ?? resolved[0] ?? null;
+export function AuditView({ decisions, inquiries, selectedId, onSelect }: AuditViewProps) {
+  const resolvedDecisions = decisions.filter(
+    d => d.status === 'approved' || d.status === 'rejected' || d.status === 'resolved-auto',
+  );
+  const acceptedInquiries = inquiries.filter(i => i.status === 'accepted');
+
+  const items: AuditItem[] = [
+    ...resolvedDecisions.map(d => ({
+      kind: 'decision' as const,
+      id: d.id,
+      data: d,
+      resolvedAt: d.resolvedAt ?? d.createdAt,
+    })),
+    ...acceptedInquiries.map(i => ({
+      kind: 'inquiry' as const,
+      id: i.id,
+      data: i,
+      resolvedAt: i.resolvedAt ?? i.createdAt,
+    })),
+  ].sort((a, b) => new Date(b.resolvedAt).getTime() - new Date(a.resolvedAt).getTime());
+
+  const selected = items.find(item => item.id === selectedId) ?? items[0] ?? null;
 
   return (
     <div className="flex h-full min-h-0">
@@ -68,39 +84,49 @@ export function AuditView({ decisions, selectedId, onSelect }: AuditViewProps) {
         <div className="border-stroke-divider shrink-0 border-b px-5 py-4">
           <h1 className="headings-h3-semibold text-fg-primary">Audit history</h1>
           <p className="paragraph-small-primary text-fg-secondary mt-0.5">
-            {resolved.length} resolved decisions, human and autonomous.
+            {items.length} resolved items, decisions and inquiries.
           </p>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           <ul>
-            {resolved.map(decision => (
-              <li key={decision.id}>
+            {items.map(item => (
+              <li key={item.id}>
                 <button
                   type="button"
-                  onClick={() => onSelect(decision.id)}
+                  onClick={() => onSelect(item.id)}
                   className={cn(
                     'border-stroke-divider hover:bg-stateslayer-overlay-hover flex w-full flex-col items-start gap-1.5 border-b px-5 py-4 text-left transition-colors',
-                    selected?.id === decision.id && 'bg-fill-onsurface-ui-1',
+                    selected?.id === item.id && 'bg-fill-onsurface-ui-1',
                   )}>
                   <div className="flex w-full items-center gap-2">
                     <IconShell type="neutral" size="sm">
-                      <Icon icon={categoryIcon[decision.category]} />
+                      <Icon
+                        icon={item.kind === 'decision' ? categoryIcon[item.data.category] : inquiryIcon}
+                      />
                     </IconShell>
                     <span className="label-regular-primary text-fg-primary min-w-0 flex-1 truncate">
-                      {decision.title}
+                      {item.kind === 'decision' ? item.data.title : item.data.proposition}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {outcomeBadge(decision)}
+                    {item.kind === 'decision' ? (
+                      outcomeBadge(item.data)
+                    ) : (
+                      <Badge variant="success" size="sm">
+                        Accepted
+                      </Badge>
+                    )}
                     <span className="paragraph-small-primary text-fg-tertiary">
-                      {relativeTime(decision.resolvedAt ?? decision.createdAt)}
+                      {relativeTime(item.resolvedAt)}
                     </span>
                   </div>
                   <p className="paragraph-small-primary text-fg-secondary">
-                    {decision.status === 'resolved-auto'
-                      ? `Handled by ${agentById.get(decision.requestingAgent)?.name} Agent`
-                      : 'Reviewed by a human'}
+                    {item.kind === 'decision'
+                      ? item.data.status === 'resolved-auto'
+                        ? `Handled by ${agentById.get(item.data.requestingAgent)?.name} Agent`
+                        : 'Reviewed by a human'
+                      : 'Synthesis accepted'}
                   </p>
                 </button>
               </li>
@@ -111,19 +137,32 @@ export function AuditView({ decisions, selectedId, onSelect }: AuditViewProps) {
 
       <div className="min-h-0 min-w-0 flex-1">
         {selected ? (
-          <DecisionDetail
-            key={selected.id}
-            decision={selected}
-            readOnly
-            onApprove={noop}
-            onReject={noop}
-            onRequestInfo={noopInfo}
-            onSideWith={noopSide}
-          />
+          selected.kind === 'decision' ? (
+            <DecisionDetail
+              key={selected.id}
+              decision={selected.data}
+              readOnly
+              onApprove={noop}
+              onReject={noop}
+              onRequestInfo={noopInfo}
+              onSideWith={noopSide}
+            />
+          ) : (
+            <InquiryDetail
+              key={selected.id}
+              inquiry={selected.data}
+              readOnly
+              onAccept={noop}
+              onChallenge={noopChallenge}
+              onGoDeeper={noop}
+              onAskForEvidence={noop}
+              onReviseProposition={noopRevise}
+            />
+          )
         ) : (
           <div className="flex h-full items-center justify-center">
             <p className="paragraph-regular-primary text-fg-secondary">
-              No resolved decisions yet.
+              No resolved items yet.
             </p>
           </div>
         )}

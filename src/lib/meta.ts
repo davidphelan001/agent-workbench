@@ -4,6 +4,7 @@ import type {
   AgentStatus,
   DecisionCategory,
   DecisionStatus,
+  InquiryStatus,
 } from '@/types/domain';
 
 export const agentIcon: Record<AgentId, string> = {
@@ -36,7 +37,6 @@ export const categoryLabel: Record<DecisionCategory, string> = {
   'refund-dispute': 'Refund dispute',
   'policy-exception': 'Policy exception',
   escalation: 'Escalation',
-  'custom-work': 'Commissioned work',
 };
 
 export const categoryIcon: Record<DecisionCategory, string> = {
@@ -44,7 +44,6 @@ export const categoryIcon: Record<DecisionCategory, string> = {
   'refund-dispute': 'balance',
   'policy-exception': 'policy',
   escalation: 'priority_high',
-  'custom-work': 'edit_note',
 };
 
 export const decisionStatusLabel: Record<DecisionStatus, string> = {
@@ -54,6 +53,15 @@ export const decisionStatusLabel: Record<DecisionStatus, string> = {
   approved: 'Approved',
   rejected: 'Rejected',
   'resolved-auto': 'Resolved autonomously',
+};
+
+export const inquiryIcon = 'psychology';
+
+export const inquiryStatusLabel: Record<InquiryStatus, string> = {
+  investigating: 'Being investigated',
+  ready: 'Ready for you',
+  revising: 'Reconsidering',
+  accepted: 'Accepted',
 };
 
 export const activityIcon: Record<ActivityEventType, string> = {

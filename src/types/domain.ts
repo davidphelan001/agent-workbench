@@ -35,6 +35,7 @@ export interface ActivityEvent {
   summary: string;
   detail?: string;
   relatedDecisionId?: string;
+  relatedInquiryId?: string;
   involvedAgentId?: AgentId;
 }
 
@@ -42,8 +43,7 @@ export type DecisionCategory =
   | 'compensation'
   | 'refund-dispute'
   | 'policy-exception'
-  | 'escalation'
-  | 'custom-work';
+  | 'escalation';
 
 export type DecisionStatus =
   | 'pending'
@@ -119,4 +119,81 @@ export interface Decision {
   disagreement?: Disagreement;
   humanRecord?: HumanRecord;
   infoRequestNote?: string;
+}
+
+// --- Inquiry: submitting a proposition for the organisation to interrogate,
+// as opposed to a Decision (an operational action awaiting approval). ---
+
+export type InquiryStatus = 'investigating' | 'ready' | 'revising' | 'accepted';
+
+export interface DisciplinePerspective {
+  name: string;
+  relevance: string;
+  contribution: string;
+}
+
+export interface Interpretation {
+  coreClaim: string;
+  assumptions: string[];
+  ambiguities: string[];
+  conceptsToDefine: { term: string; note: string }[];
+  alternativeReadings: string[];
+}
+
+export interface Critique {
+  weakAssumptions: string[];
+  contradictions: string[];
+  missingEvidence: string[];
+  alternativeInterpretations: string[];
+  failureModes: string[];
+  framingIssues: string[];
+}
+
+export interface SystemsObservation {
+  dimension: string;
+  observation: string;
+}
+
+export interface Synthesis {
+  wellSupported: string[];
+  uncertain: string[];
+  contested: string[];
+  missing: string[];
+  whatChanged: string;
+}
+
+export interface Reframe {
+  original: string;
+  strengthened: string;
+  rationale: string;
+}
+
+export interface InquiryRound {
+  id: string;
+  type: 'challenge' | 'deeper' | 'evidence';
+  note: string;
+  response: string;
+  timestamp: string;
+}
+
+export interface Inquiry {
+  id: string;
+  proposition: string;
+  context?: string;
+  status: InquiryStatus;
+  createdAt: string;
+  resolvedAt?: string;
+  interpretation: Interpretation;
+  disciplines: DisciplinePerspective[];
+  critique: Critique;
+  systemsView: SystemsObservation[];
+  secondOrderEffects: string[];
+  synthesis: Synthesis;
+  reframe: Reframe;
+  rounds: InquiryRound[];
+  humanRecord?: {
+    action: 'accepted';
+    note?: string;
+    timestamp: string;
+  };
 }
