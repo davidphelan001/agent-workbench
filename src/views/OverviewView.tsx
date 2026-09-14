@@ -20,6 +20,7 @@ interface OverviewViewProps {
   activity: ActivityEvent[];
   onOpenDecision: (id: string) => void;
   onGoToActivity: () => void;
+  onStartWork: () => void;
 }
 
 const significantTypes = new Set([
@@ -35,6 +36,7 @@ export function OverviewView({
   activity,
   onOpenDecision,
   onGoToActivity,
+  onStartWork,
 }: OverviewViewProps) {
   const needsAttention = decisions
     .filter(d => d.status === 'pending' || d.status === 'info-requested')
@@ -53,11 +55,16 @@ export function OverviewView({
   return (
     <div className="mx-auto flex w-full max-w-[1120px] gap-8 px-8 py-8">
       <div className="flex min-w-0 flex-1 flex-col gap-8">
-        <div>
-          <h1 className="headings-h2-semibold text-fg-primary">Overview</h1>
-          <p className="paragraph-regular-primary text-fg-secondary mt-1">
-            What the organisation is doing, and what actually needs you right now.
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="headings-h2-semibold text-fg-primary">Overview</h1>
+            <p className="paragraph-regular-primary text-fg-secondary mt-1">
+              What the organisation is doing, and what actually needs you right now.
+            </p>
+          </div>
+          <Button onClick={onStartWork} className="shrink-0">
+            Start new work
+          </Button>
         </div>
 
         <div className="flex gap-8">

@@ -42,7 +42,8 @@ export type DecisionCategory =
   | 'compensation'
   | 'refund-dispute'
   | 'policy-exception'
-  | 'escalation';
+  | 'escalation'
+  | 'custom-work';
 
 export type DecisionStatus =
   | 'pending'

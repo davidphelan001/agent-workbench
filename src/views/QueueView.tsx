@@ -31,6 +31,14 @@ export function QueueView({
   );
   const selected = queue.find(d => d.id === selectedId) ?? queue[0] ?? null;
 
+  // A decision that exists but isn't in the active queue yet (e.g. agents
+  // are still working on something just commissioned) shouldn't silently
+  // fall back to a different item — say plainly that it isn't ready.
+  const selectedButNotReady =
+    !selected && selectedId
+      ? decisions.find(d => d.id === selectedId)
+      : undefined;
+
   return (
     <div className="flex h-full min-h-0">
       <div className="border-stroke-divider flex w-[360px] shrink-0 flex-col border-r">
@@ -103,6 +111,13 @@ export function QueueView({
             onRequestInfo={onRequestInfo}
             onSideWith={onSideWith}
           />
+        ) : selectedButNotReady ? (
+          <div className="flex h-full items-center justify-center px-8">
+            <p className="paragraph-regular-primary text-fg-secondary max-w-sm text-center">
+              “{selectedButNotReady.title}” isn’t ready for you yet — agents
+              are still working on it. Check Agent activity to follow along.
+            </p>
+          </div>
         ) : (
           <div className="flex h-full items-center justify-center">
             <p className="paragraph-regular-primary text-fg-secondary">

@@ -36,6 +36,7 @@ export const categoryLabel: Record<DecisionCategory, string> = {
   'refund-dispute': 'Refund dispute',
   'policy-exception': 'Policy exception',
   escalation: 'Escalation',
+  'custom-work': 'Commissioned work',
 };
 
 export const categoryIcon: Record<DecisionCategory, string> = {
@@ -43,12 +44,13 @@ export const categoryIcon: Record<DecisionCategory, string> = {
   'refund-dispute': 'balance',
   'policy-exception': 'policy',
   escalation: 'priority_high',
+  'custom-work': 'edit_note',
 };
 
 export const decisionStatusLabel: Record<DecisionStatus, string> = {
   pending: 'Needs judgement',
   'info-requested': 'Awaiting more information',
-  investigating: 'Under investigation',
+  investigating: 'Agents working on this',
   approved: 'Approved',
   rejected: 'Rejected',
   'resolved-auto': 'Resolved autonomously',

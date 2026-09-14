@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { NavRail } from '@/components/layout/NavRail';
+import { StartWorkDialog } from '@/components/workbench/StartWorkDialog';
 import { agents as initialAgents } from '@/data/agents';
 import { initialActivity } from '@/data/activity';
 import { initialDecisions } from '@/data/decisions';
 import { minutesAgo } from '@/lib/time';
+import { buildWorkDecision, type WorkBriefInput } from '@/lib/workGenerator';
 import { ActivityView } from '@/views/ActivityView';
 import { AuditView } from '@/views/AuditView';
 import { OverviewView } from '@/views/OverviewView';
 import { QueueView } from '@/views/QueueView';
-import type { ActivityEvent, AgentId, Decision } from '@/types/domain';
+import type { ActivityEvent, Agent, AgentId, Decision } from '@/types/domain';
 
 export type View = 'overview' | 'queue' | 'activity' | 'audit';
 
@@ -26,12 +28,23 @@ export default function App() {
   );
   const [decisions, setDecisions] = useState<Decision[]>(initialDecisions);
   const [activity, setActivity] = useState<ActivityEvent[]>(initialActivity);
+  const [agents, setAgents] = useState<Agent[]>(initialAgents);
+  const [startWorkOpen, setStartWorkOpen] = useState(false);
   const scheduled = useRef(new Set<string>());
-
-  const agents = initialAgents;
 
   function logEvent(event: Omit<ActivityEvent, 'id' | 'timestamp'>) {
     setActivity(prev => [{ ...event, id: nextEventId(), timestamp: new Date().toISOString() }, ...prev]);
+  }
+
+  function patchAgent(
+    id: AgentId,
+    patch: Partial<Agent> | ((agent: Agent) => Partial<Agent>),
+  ) {
+    setAgents(prev =>
+      prev.map(a =>
+        a.id === id ? { ...a, ...(typeof patch === 'function' ? patch(a) : patch) } : a,
+      ),
+    );
   }
 
   function openDecision(id: string, target: View = 'queue') {
@@ -182,6 +195,72 @@ export default function App() {
     });
   }
 
+  // Commission a new piece of work from the human. Generates a decision up
+  // front (status "investigating" — not yet in the judgement queue) and
+  // walks it through Planner -> Research -> Reviewer on a short delay so it
+  // reads as agents actually doing something, before Reviewer escalates it
+  // to the judgement queue exactly like any other decision.
+  function handleCommissionWork(input: WorkBriefInput) {
+    const id = `work-${Date.now()}`;
+    const decision = buildWorkDecision(id, input);
+    const { title } = decision;
+
+    setDecisions(prev => [decision, ...prev]);
+    setView('activity');
+
+    patchAgent('planner', { status: 'working', currentTask: `Scoping: ${title}` });
+    logEvent({
+      agentId: 'planner',
+      type: 'task-started',
+      summary: `Started scoping: ${title}`,
+      detail: input.brief,
+      relatedDecisionId: id,
+    });
+
+    window.setTimeout(() => {
+      patchAgent('planner', a => ({
+        currentTask: `Planning approach for: ${title}`,
+        tasksCompletedToday: a.tasksCompletedToday + 1,
+      }));
+      logEvent({
+        agentId: 'planner',
+        type: 'task-completed',
+        summary: `Broke "${title}" into a plan aimed at your desired outcome`,
+        detail: input.desiredOutcome || undefined,
+        relatedDecisionId: id,
+      });
+    }, 3500);
+
+    window.setTimeout(() => {
+      patchAgent('research', a => ({
+        status: 'working',
+        currentTask: `Gathered background for: ${title}`,
+        tasksCompletedToday: a.tasksCompletedToday + 1,
+      }));
+      logEvent({
+        agentId: 'research',
+        type: 'task-completed',
+        summary: `Gathered background for "${title}"`,
+        detail: input.context || 'No additional context was provided.',
+        relatedDecisionId: id,
+      });
+    }, 7000);
+
+    window.setTimeout(() => {
+      patchAgent('reviewer', a => ({
+        tasksCompletedToday: a.tasksCompletedToday + 1,
+      }));
+      logEvent({
+        agentId: 'reviewer',
+        type: 'escalated',
+        summary: `Escalated "${title}" to your judgement`,
+        detail: 'No existing policy covers this request, so it needs a human decision.',
+        relatedDecisionId: id,
+      });
+      updateDecision(id, d => ({ ...d, status: 'pending', createdAt: minutesAgo(0) }));
+    }, 10500);
+  }
+
   // Any decision seeded as already "info-requested" also gets its follow-up
   // scheduled once, so the loop closes even if the human never touches it.
   useEffect(() => {
@@ -215,6 +294,7 @@ export default function App() {
             activity={activity}
             onOpenDecision={id => openDecision(id, 'queue')}
             onGoToActivity={() => setView('activity')}
+            onStartWork={() => setStartWorkOpen(true)}
           />
         )}
         {view === 'queue' && (
@@ -242,6 +322,12 @@ export default function App() {
           />
         )}
       </main>
+
+      <StartWorkDialog
+        open={startWorkOpen}
+        onOpenChange={setStartWorkOpen}
+        onSubmit={handleCommissionWork}
+      />
     </div>
   );
 }

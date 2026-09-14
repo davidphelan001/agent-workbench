@@ -28,7 +28,7 @@ export function InvestigationChain({ chain }: InvestigationChainProps) {
   return (
     <div>
       <p className="paragraph-small-primary text-fg-tertiary mb-3">
-        Customer history → Knowledge → Policy → Agent reasoning → Recommendation.
+        Background → Knowledge → Policy → Agent reasoning → Recommendation.
         Expand a stage to inspect what it drew on.
       </p>
       <Accordion
