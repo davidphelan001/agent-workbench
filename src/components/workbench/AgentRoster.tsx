@@ -13,7 +13,7 @@ export function AgentRoster({ agents }: AgentRosterProps) {
   return (
     <Card size="sm">
       <CardHeader>
-        <CardTitle>Agents</CardTitle>
+        <CardTitle>Heph</CardTitle>
       </CardHeader>
       <CardContent className="gap-0 pb-6">
         <ul className="flex flex-col">

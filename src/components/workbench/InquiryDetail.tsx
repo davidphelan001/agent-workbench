@@ -122,8 +122,8 @@ export function InquiryDetail({
             {inquiry.status === 'investigating' || inquiry.status === 'revising' ? (
               <p className="paragraph-regular-primary text-fg-secondary py-4">
                 {inquiry.status === 'revising'
-                  ? 'The organisation is reconsidering this inquiry — check Agent activity to follow along.'
-                  : 'The organisation is still working through this — check Agent activity to follow along.'}
+                  ? 'Heph is reconsidering this — check Heph’s activity to follow along.'
+                  : 'Heph is still working through this — check Heph’s activity to follow along.'}
               </p>
             ) : (
               <>

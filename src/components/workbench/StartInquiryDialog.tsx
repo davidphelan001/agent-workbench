@@ -52,12 +52,11 @@ export function StartInquiryDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent size="lg">
         <DialogHeader>
-          <DialogTitle>New inquiry</DialogTitle>
+          <DialogTitle>New idea</DialogTitle>
           <DialogDescription>
-            Give the organisation something you're thinking about. It will be
-            interpreted, grounded in relevant domain knowledge, challenged,
-            and returned as a stronger version of the thinking — not a single
-            answer.
+            Give Heph something you're thinking about. It will be interpreted,
+            grounded in relevant domain knowledge, challenged, and returned as
+            a stronger version of the thinking — not a single answer.
           </DialogDescription>
         </DialogHeader>
 

@@ -1,37 +1,53 @@
-# Agent Workbench
+# Hephwerk
 
-An experimental prototype exploring what it means for a human to manage and
-work alongside an organisation of AI agents: what should the human see, and
-when should they need to intervene.
+A personal intelligence/work environment: give it an idea, proposition, or
+question you're developing, and Heph — the work system behind it —
+interprets it, grounds it in relevant domain knowledge, actively challenges
+it, and hands back a strengthened synthesis rather than a single answer.
 
 Built on the [QuantumBlack Design System](https://github.com/mckinsey/quantumblack-design-system)
 (QBDS) — components, design tokens, typography, and interaction conventions
 are used as shipped, not reinvented.
 
-## What this is
+## The model
 
-Five agents (Planner, Research, Customer, Operations, Reviewer) work
-continuously against mocked data. Most of their work never surfaces. The
-prototype is built around the moments it does:
+```
+ME → IDEAS → HEPH INVESTIGATES / DEVELOPS / CHALLENGES → CRIT → MY INPUT → STRONGER THINKING → HISTORY
+```
 
-- **Overview** — what the organisation is doing, and what actually needs you.
-- **Judgement queue** — decisions genuinely requiring human input: what
-  happened, what's recommended, the evidence and policy behind it, and why
-  it was escalated.
-- **Investigate** — a five-stage chain (customer history → knowledge → policy
-  → agent reasoning → recommendation) for inspecting how a recommendation
-  was reached.
-- **Agent disagreement** — when two agents reach different conclusions from
-  the same evidence, both positions are shown side by side.
-- **Agent activity** — a chronological stream of what agents have done,
-  requested of each other, and escalated.
-- **Audit history** — resolved decisions, including cases where a human
-  overrode the agent's recommendation.
+Heph works through three specialists (Planner, Research, Reviewer) rather
+than exposing a single black box. Submitting an idea walks it through:
+
+1. **Interpretation** — Planner decomposes the idea: core claim, assumptions,
+   ambiguities, concepts that need defining, alternative readings.
+2. **Domain experts** — Research identifies which bodies of knowledge are
+   actually relevant (picked by matching the submission's text against a
+   catalog of disciplines, not a fixed generic list) and what each contributes.
+3. **Critique** — Reviewer actively challenges it: weak assumptions,
+   contradictions, missing evidence, failure modes, where the framing itself
+   may be wrong. Never auto-agrees.
+4. **Systems lens** — second-order effects across technology, organisation,
+   people, economics, governance, and experience.
+5. **Synthesis** — what's well supported, uncertain, contested, or missing.
+   No single confidence number pretending false precision.
+6. **Reframe** — a strengthened version of the original idea.
+7. **Your input** — Accept, Challenge, ask to go deeper, ask for more
+   evidence, or revise the proposition entirely.
+
+## Navigation
+
+- **At a glance** — what you're working on, what's changed, what needs you.
+- **Ideas** — every proposition and line of thinking you're developing.
+- **Crit queue** — the ideas where your judgement could materially improve
+  the thinking, right now.
+- **Heph's activity** — a chronological stream of what Heph has actually
+  done: investigating, connecting, challenging.
+- **History** — accepted syntheses, and how your thinking on them evolved.
 
 All data is mocked (`src/data/`) and state lives in `App.tsx`. There is no
-backend — the shape of `Decision` and `ActivityEvent` in `src/types/domain.ts`
-is meant to be what a real agent orchestration layer would eventually
-populate.
+backend — the shape of `Inquiry` and `ActivityEvent` in
+`src/types/domain.ts` is meant to be what a real reasoning/orchestration
+layer would eventually populate.
 
 ## Running it
 

@@ -14,38 +14,31 @@ interface NavItem {
 interface NavRailProps {
   active: View;
   onSelect: (view: View) => void;
-  queueCount: number;
-  disagreementCount: number;
-  inquiryCount: number;
+  ideaCount: number;
+  critCount: number;
 }
 
-export function NavRail({
-  active,
-  onSelect,
-  queueCount,
-  disagreementCount,
-  inquiryCount,
-}: NavRailProps) {
+export function NavRail({ active, onSelect, ideaCount, critCount }: NavRailProps) {
   const items: NavItem[] = [
-    { id: 'overview', label: 'Overview', icon: 'grid_view' },
+    { id: 'overview', label: 'At a glance', icon: 'grid_view' },
     {
       id: 'inquiries',
-      label: 'Inquiries',
+      label: 'Ideas',
       icon: 'psychology',
-      count: inquiryCount,
+      count: ideaCount,
     },
     {
       id: 'queue',
-      label: 'Judgement queue',
-      icon: 'gavel',
-      count: queueCount,
+      label: 'Crit queue',
+      icon: 'forum',
+      count: critCount,
     },
     {
       id: 'activity',
-      label: 'Agent activity',
+      label: 'Heph’s activity',
       icon: 'timeline',
     },
-    { id: 'audit', label: 'Audit history', icon: 'history' },
+    { id: 'audit', label: 'History', icon: 'history' },
   ];
 
   return (
@@ -56,9 +49,7 @@ export function NavRail({
         <IconShell type="custom" className="text-fg-primary" size="default">
           <Icon icon="hub" />
         </IconShell>
-        <span className="headings-h4-semibold text-fg-primary">
-          Agent Workbench
-        </span>
+        <span className="headings-h4-semibold text-fg-primary">Hephwerk</span>
       </div>
 
       <ul className="flex flex-col gap-0.5 px-2 py-2">
@@ -78,12 +69,6 @@ export function NavRail({
                 <Icon icon={item.icon} />
               </IconShell>
               <span className="flex-1 truncate">{item.label}</span>
-              {item.id === 'queue' && disagreementCount > 0 && (
-                <span
-                  className="bg-status-warning size-1.5 shrink-0 rounded-full"
-                  aria-label={`${disagreementCount} unresolved disagreement`}
-                />
-              )}
               {typeof item.count === 'number' && item.count > 0 && (
                 <NumericBadge size="sm" variant="secondary">
                   {item.count}
@@ -96,7 +81,7 @@ export function NavRail({
 
       <div className="mt-auto border-t border-stroke-divider px-4 py-3">
         <p className="paragraph-small-primary text-fg-tertiary">
-          Prototype · mocked agent data
+          Prototype · Heph’s work is simulated
         </p>
       </div>
     </nav>

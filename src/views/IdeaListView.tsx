@@ -7,7 +7,9 @@ import { relativeTime } from '@/lib/time';
 import { cn } from '@/lib/utils';
 import type { Inquiry } from '@/types/domain';
 
-interface InquiriesViewProps {
+interface IdeaListViewProps {
+  /** "all" is the full idea library (Ideas); "crit" is just what needs you (Crit queue). */
+  scope: 'all' | 'crit';
   inquiries: Inquiry[];
   selectedId: string | null;
   onSelect: (id: string) => void;
@@ -18,7 +20,21 @@ interface InquiriesViewProps {
   onReviseProposition: (proposition: string) => void;
 }
 
-export function InquiriesView({
+const copy = {
+  all: {
+    title: 'Ideas',
+    description: 'Propositions, questions, and lines of thinking you’re developing.',
+    empty: 'Nothing here yet — start an idea from At a glance.',
+  },
+  crit: {
+    title: 'Crit queue',
+    description: 'Where your perspective, expertise, or judgement could materially improve the thinking.',
+    empty: 'Nothing waiting on your critique right now.',
+  },
+};
+
+export function IdeaListView({
+  scope,
   inquiries,
   selectedId,
   onSelect,
@@ -27,27 +43,25 @@ export function InquiriesView({
   onGoDeeper,
   onAskForEvidence,
   onReviseProposition,
-}: InquiriesViewProps) {
-  const list = [...inquiries].sort(
+}: IdeaListViewProps) {
+  const filtered = scope === 'crit' ? inquiries.filter(i => i.status === 'ready') : inquiries;
+  const list = [...filtered].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
   const selected = list.find(i => i.id === selectedId) ?? list[0] ?? null;
+  const text = copy[scope];
 
   return (
     <div className="flex h-full min-h-0">
       <div className="border-stroke-divider flex w-[360px] shrink-0 flex-col border-r">
         <div className="border-stroke-divider shrink-0 border-b px-5 py-4">
-          <h1 className="headings-h3-semibold text-fg-primary">Inquiries</h1>
-          <p className="paragraph-small-primary text-fg-secondary mt-0.5">
-            Ideas the organisation is investigating, challenging, and strengthening.
-          </p>
+          <h1 className="headings-h3-semibold text-fg-primary">{text.title}</h1>
+          <p className="paragraph-small-primary text-fg-secondary mt-0.5">{text.description}</p>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {list.length === 0 ? (
-            <p className="paragraph-regular-primary text-fg-secondary p-5">
-              Nothing submitted yet — start one from Overview.
-            </p>
+            <p className="paragraph-regular-primary text-fg-secondary p-5">{text.empty}</p>
           ) : (
             <ul>
               {list.map(inquiry => (
@@ -98,9 +112,7 @@ export function InquiriesView({
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <p className="paragraph-regular-primary text-fg-secondary">
-              Select an inquiry to inspect it.
-            </p>
+            <p className="paragraph-regular-primary text-fg-secondary">Select one to inspect it.</p>
           </div>
         )}
       </div>

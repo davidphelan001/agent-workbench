@@ -10,25 +10,18 @@ import type { ActivityEvent } from '@/types/domain';
 
 interface ActivityViewProps {
   activity: ActivityEvent[];
-  onOpenDecision: (id: string) => void;
   onOpenInquiry: (id: string) => void;
 }
 
-const significantTypes = new Set([
-  'escalated',
-  'disagreement',
-  'human-decision',
-  'uncertainty',
-]);
+const significantTypes = new Set(['escalated', 'human-decision', 'uncertainty']);
 
 const eventToneClass: Record<string, string> = {
   uncertainty: 'text-status-warning',
   escalated: 'text-status-warning',
-  disagreement: 'text-status-error',
   'human-decision': 'text-fg-primary',
 };
 
-export function ActivityView({ activity, onOpenDecision, onOpenInquiry }: ActivityViewProps) {
+export function ActivityView({ activity, onOpenInquiry }: ActivityViewProps) {
   const [filter, setFilter] = useState<'all' | 'significant'>('all');
 
   const sorted = [...activity].sort(
@@ -43,9 +36,9 @@ export function ActivityView({ activity, onOpenDecision, onOpenInquiry }: Activi
     <div className="mx-auto flex w-full max-w-[880px] flex-col gap-6 px-8 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="headings-h2-semibold text-fg-primary">Agent activity</h1>
+          <h1 className="headings-h2-semibold text-fg-primary">Heph’s activity</h1>
           <p className="paragraph-regular-primary text-fg-secondary mt-1">
-            What the organisation has been doing, in the order it happened.
+            What Heph has been doing across your ideas — investigating, connecting, and challenging.
           </p>
         </div>
         <SegmentedControls
@@ -62,6 +55,7 @@ export function ActivityView({ activity, onOpenDecision, onOpenInquiry }: Activi
       <ol className="flex flex-col">
         {filtered.map((event, index) => {
           const agent = agentById.get(event.agentId);
+          const actor = event.type === 'human-decision' ? 'You' : agent?.name;
           const tone = eventToneClass[event.type] ?? 'text-fg-secondary';
 
           return (
@@ -77,13 +71,13 @@ export function ActivityView({ activity, onOpenDecision, onOpenInquiry }: Activi
               <div className="min-w-0 flex-1 pb-6">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="paragraph-regular-primary text-fg-primary">
-                    <span className="font-semibold">{agent?.name} Agent</span>{' '}
+                    <span className="font-semibold">{actor}</span>{' '}
                     {event.summary.charAt(0).toLowerCase() + event.summary.slice(1)}
                     {event.involvedAgentId && (
                       <>
                         {' '}
                         <span className="text-fg-secondary">
-                          ({agentById.get(event.involvedAgentId)?.name} Agent)
+                          ({agentById.get(event.involvedAgentId)?.name})
                         </span>
                       </>
                     )}
@@ -97,20 +91,12 @@ export function ActivityView({ activity, onOpenDecision, onOpenInquiry }: Activi
                     {event.detail}
                   </p>
                 )}
-                {event.relatedDecisionId && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenDecision(event.relatedDecisionId!)}
-                    className="paragraph-small-primary-link text-fg-secondary mt-1 cursor-pointer">
-                    View decision
-                  </button>
-                )}
                 {event.relatedInquiryId && (
                   <button
                     type="button"
                     onClick={() => onOpenInquiry(event.relatedInquiryId!)}
                     className="paragraph-small-primary-link text-fg-secondary mt-1 cursor-pointer">
-                    View inquiry
+                    View idea
                   </button>
                 )}
               </div>

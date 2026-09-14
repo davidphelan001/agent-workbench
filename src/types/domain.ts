@@ -1,9 +1,4 @@
-export type AgentId =
-  | 'planner'
-  | 'research'
-  | 'customer'
-  | 'operations'
-  | 'reviewer';
+export type AgentId = 'planner' | 'research' | 'reviewer';
 
 export type AgentStatus = 'working' | 'idle' | 'uncertain' | 'blocked';
 
@@ -24,7 +19,6 @@ export type ActivityEventType =
   | 'agent-requested'
   | 'uncertainty'
   | 'escalated'
-  | 'disagreement'
   | 'human-decision';
 
 export interface ActivityEvent {
@@ -34,95 +28,12 @@ export interface ActivityEvent {
   type: ActivityEventType;
   summary: string;
   detail?: string;
-  relatedDecisionId?: string;
   relatedInquiryId?: string;
   involvedAgentId?: AgentId;
 }
 
-export type DecisionCategory =
-  | 'compensation'
-  | 'refund-dispute'
-  | 'policy-exception'
-  | 'escalation';
-
-export type DecisionStatus =
-  | 'pending'
-  | 'info-requested'
-  | 'investigating'
-  | 'approved'
-  | 'rejected'
-  | 'resolved-auto';
-
-export interface EvidenceItem {
-  label: string;
-  detail: string;
-  source: string;
-}
-
-export interface ChainStage {
-  id: string;
-  title: string;
-  summary: string;
-  details: EvidenceItem[];
-  confidence?: number;
-  flagged?: boolean;
-}
-
-export interface AgentPosition {
-  agentId: AgentId;
-  position: string;
-  evidence: EvidenceItem[];
-  confidence: number;
-}
-
-export interface Disagreement {
-  positions: [AgentPosition, AgentPosition];
-  pointOfDivergence: string;
-  autoResolvable: boolean;
-  reasonNotAutoResolved: string;
-}
-
-export interface HumanRecord {
-  action: 'approved' | 'rejected' | 'sided-a' | 'sided-b' | 'requested-info';
-  note?: string;
-  timestamp: string;
-  changedRecommendation: boolean;
-}
-
-export interface Decision {
-  id: string;
-  category: DecisionCategory;
-  title: string;
-  customer?: string;
-  status: DecisionStatus;
-  createdAt: string;
-  resolvedAt?: string;
-  summary: string;
-  whatHappened: string;
-  recommendation: {
-    action: string;
-    amount?: string;
-    rationale: string;
-  };
-  confidence: number;
-  requestingAgent: AgentId;
-  involvedAgents: AgentId[];
-  evidence: EvidenceItem[];
-  policy: {
-    name: string;
-    excerpt: string;
-    matchConfidence: number;
-  };
-  unusualFactors: string[];
-  escalationReason: string;
-  chain: ChainStage[];
-  disagreement?: Disagreement;
-  humanRecord?: HumanRecord;
-  infoRequestNote?: string;
-}
-
-// --- Inquiry: submitting a proposition for the organisation to interrogate,
-// as opposed to a Decision (an operational action awaiting approval). ---
+// --- Inquiry: an idea, proposition or question submitted for Heph to
+// interpret, ground in relevant knowledge, and challenge. ---
 
 export type InquiryStatus = 'investigating' | 'ready' | 'revising' | 'accepted';
 

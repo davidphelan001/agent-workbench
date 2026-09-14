@@ -10,83 +10,32 @@ import {
 } from '@/components/ui/statistic';
 import { AgentRoster } from '@/components/workbench/AgentRoster';
 import { relativeTime } from '@/lib/time';
-import { categoryIcon, inquiryIcon } from '@/lib/meta';
+import { inquiryIcon } from '@/lib/meta';
 import { agentById } from '@/data/agents';
-import type { Agent, ActivityEvent, Decision, Inquiry } from '@/types/domain';
+import type { Agent, ActivityEvent, Inquiry } from '@/types/domain';
 
 interface OverviewViewProps {
   agents: Agent[];
-  decisions: Decision[];
   inquiries: Inquiry[];
   activity: ActivityEvent[];
-  onOpenDecision: (id: string) => void;
   onOpenInquiry: (id: string) => void;
   onGoToActivity: () => void;
   onStartInquiry: () => void;
 }
 
-const significantTypes = new Set([
-  'escalated',
-  'disagreement',
-  'human-decision',
-  'uncertainty',
-]);
-
-interface AttentionItem {
-  id: string;
-  kind: 'decision' | 'inquiry';
-  icon: string;
-  title: string;
-  summary: string;
-  createdAt: string;
-  urgent: boolean;
-  badge?: string;
-}
+const significantTypes = new Set(['escalated', 'human-decision', 'uncertainty']);
 
 export function OverviewView({
   agents,
-  decisions,
   inquiries,
   activity,
-  onOpenDecision,
   onOpenInquiry,
   onGoToActivity,
   onStartInquiry,
 }: OverviewViewProps) {
-  const pendingDecisions = decisions.filter(
-    d => d.status === 'pending' || d.status === 'info-requested',
-  );
-  const readyInquiries = inquiries.filter(i => i.status === 'ready');
-
-  const needsAttention: AttentionItem[] = [
-    ...pendingDecisions.map(d => ({
-      id: d.id,
-      kind: 'decision' as const,
-      icon: categoryIcon[d.category],
-      title: d.title,
-      summary: d.summary,
-      createdAt: d.createdAt,
-      urgent: Boolean(d.disagreement),
-      badge: d.disagreement
-        ? 'Agents disagree'
-        : d.status === 'info-requested'
-          ? 'Awaiting information'
-          : undefined,
-    })),
-    ...readyInquiries.map(i => ({
-      id: i.id,
-      kind: 'inquiry' as const,
-      icon: inquiryIcon,
-      title: i.proposition,
-      summary: i.reframe.strengthened,
-      createdAt: i.createdAt,
-      urgent: false,
-      badge: 'Ready for you',
-    })),
-  ].sort((a, b) => {
-    if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  const needsAttention = inquiries
+    .filter(i => i.status === 'ready')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const blockedAgents = agents.filter(a => a.status === 'blocked' || a.status === 'uncertain');
   const tasksCompletedToday = agents.reduce((sum, a) => sum + a.tasksCompletedToday, 0);
@@ -99,27 +48,27 @@ export function OverviewView({
       <div className="flex min-w-0 flex-1 flex-col gap-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="headings-h2-semibold text-fg-primary">Overview</h1>
+            <h1 className="headings-h2-semibold text-fg-primary">At a glance</h1>
             <p className="paragraph-regular-primary text-fg-secondary mt-1">
-              What the organisation is doing, and what actually needs you right now.
+              What you're currently working on, what has changed, and what may need you.
             </p>
           </div>
           <Button onClick={onStartInquiry} className="shrink-0">
-            New inquiry
+            New idea
           </Button>
         </div>
 
         <div className="flex gap-8">
           <Statistic size="sm">
-            <StatisticLabel>Tasks completed today</StatisticLabel>
+            <StatisticLabel>Worked on today</StatisticLabel>
             <StatisticValue value={tasksCompletedToday} />
           </Statistic>
           <Statistic size="sm">
-            <StatisticLabel>Waiting on you</StatisticLabel>
+            <StatisticLabel>Waiting on your critique</StatisticLabel>
             <StatisticValue value={needsAttention.length} />
           </Statistic>
           <Statistic size="sm">
-            <StatisticLabel>Agents blocked or uncertain</StatisticLabel>
+            <StatisticLabel>Heph uncertain or blocked</StatisticLabel>
             <StatisticValue value={blockedAgents.length} />
           </Statistic>
         </div>
@@ -133,8 +82,8 @@ export function OverviewView({
             <Card size="sm">
               <CardContent className="py-6">
                 <p className="paragraph-regular-primary text-fg-secondary">
-                  Nothing needs you right now. {agents.length} agents are working
-                  autonomously.
+                  Nothing needs you right now. Heph is working through your ideas
+                  on its own.
                 </p>
               </CardContent>
             </Card>
@@ -144,30 +93,26 @@ export function OverviewView({
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() =>
-                    item.kind === 'decision' ? onOpenDecision(item.id) : onOpenInquiry(item.id)
-                  }
+                  onClick={() => onOpenInquiry(item.id)}
                   className="text-left">
                   <Card
                     size="sm"
                     className="hover:border-stroke-tertiary-hover border border-transparent transition-colors">
                     <CardContent className="flex items-start gap-3 py-4">
                       <IconShell type="neutral" size="default" className="mt-0.5">
-                        <Icon icon={item.icon} />
+                        <Icon icon={inquiryIcon} />
                       </IconShell>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="label-regular-primary text-fg-primary truncate">
-                            {item.title}
+                            {item.proposition}
                           </span>
-                          {item.badge && (
-                            <Badge variant={item.urgent ? 'warning' : 'alternative'} size="sm">
-                              {item.badge}
-                            </Badge>
-                          )}
+                          <Badge variant="alternative" size="sm">
+                            Ready for you
+                          </Badge>
                         </div>
                         <p className="paragraph-small-primary text-fg-secondary mt-1 line-clamp-2">
-                          {item.summary}
+                          {item.reframe.strengthened}
                         </p>
                       </div>
                       <span className="paragraph-small-primary text-fg-tertiary shrink-0">
@@ -205,7 +150,7 @@ export function OverviewView({
                     <div className="min-w-0 flex-1">
                       <p className="paragraph-regular-primary text-fg-primary">
                         <span className="font-semibold">
-                          {agentById.get(event.agentId)?.name}
+                          {event.type === 'human-decision' ? 'You' : agentById.get(event.agentId)?.name}
                         </span>{' '}
                         {event.summary.charAt(0).toLowerCase() + event.summary.slice(1)}
                       </p>
