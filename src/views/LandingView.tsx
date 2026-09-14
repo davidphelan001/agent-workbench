@@ -54,7 +54,7 @@ export function LandingView({ onExplore }: LandingViewProps) {
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
-        src="/videos/hephwerk-hero.mov"
+        src="/videos/hephwerk-hero.mp4"
         autoPlay
         loop
         muted
