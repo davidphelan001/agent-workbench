@@ -4,7 +4,6 @@ import {
   StatisticLabel,
   StatisticValue,
 } from '@/components/ui/statistic';
-import { AgentRoster } from '@/components/workbench/AgentRoster';
 import { relativeTime } from '@/lib/time';
 import { agentById } from '@/data/agents';
 import type { Agent, ActivityEvent, Inquiry } from '@/types/domain';
@@ -39,7 +38,7 @@ export function OverviewView({
     .slice(0, 5);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1120px] gap-16 px-8 py-14">
+    <div className="mx-auto flex w-full max-w-[760px] px-8 py-14">
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="mb-10 flex items-start justify-between gap-4">
           <div>
@@ -136,10 +135,6 @@ export function OverviewView({
           </div>
         </section>
       </div>
-
-      <aside className="w-[280px] shrink-0">
-        <AgentRoster agents={agents} />
-      </aside>
     </div>
   );
 }

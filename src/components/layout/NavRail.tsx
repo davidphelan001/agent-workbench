@@ -66,10 +66,6 @@ export function NavRail({ active, onSelect, ideaCount, critCount }: NavRailProps
           );
         })}
       </ul>
-
-      <p className="paragraph-small-primary text-fg-tertiary mt-auto">
-        Prototype · Heph’s work is simulated
-      </p>
     </nav>
   );
 }

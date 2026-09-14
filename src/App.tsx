@@ -16,6 +16,7 @@ import {
 import { ActivityView } from '@/views/ActivityView';
 import { IdeaListView } from '@/views/IdeaListView';
 import { IdeasView } from '@/views/IdeasView';
+import { LandingView } from '@/views/LandingView';
 import { OverviewView } from '@/views/OverviewView';
 import type { ActivityEvent, Agent, AgentId, Inquiry } from '@/types/domain';
 
@@ -33,6 +34,7 @@ function shortTitle(text: string, max = 70): string {
 }
 
 export default function App() {
+  const [entered, setEntered] = useState(false);
   const [view, setView] = useState<View>('overview');
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null);
   const [inquiries, setInquiries] = useState<Inquiry[]>(initialInquiries);
@@ -278,81 +280,86 @@ export default function App() {
   const critCount = inquiries.filter(i => i.status === 'ready').length;
 
   return (
-    <div className="bg-surface-base flex h-screen w-full overflow-hidden">
-      <NavRail
-        active={view}
-        onSelect={setView}
-        ideaCount={inquiries.length}
-        critCount={critCount}
-      />
+    <>
+      {!entered && <LandingView onExplore={() => setEntered(true)} />}
+      <div
+        inert={!entered}
+        className="bg-surface-base flex h-screen w-full overflow-hidden">
+        <NavRail
+          active={view}
+          onSelect={setView}
+          ideaCount={inquiries.length}
+          critCount={critCount}
+        />
 
-      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-        {view === 'overview' && (
-          <OverviewView
-            agents={agents}
-            inquiries={inquiries}
-            activity={activity}
-            onOpenInquiry={openInquiry}
-            onGoToActivity={() => setView('activity')}
-            onStartInquiry={() => {
-              setRevisionSeed(undefined);
-              setInquiryDialogOpen(true);
-            }}
-          />
-        )}
-        {view === 'inquiries' && (
-          <IdeasView
-            inquiries={inquiries}
-            selectedId={selectedInquiryId}
-            onSelect={setSelectedInquiryId}
-            onStartInquiry={() => {
-              setRevisionSeed(undefined);
-              setInquiryDialogOpen(true);
-            }}
-            onAccept={handleAccept}
-            onChallenge={handleChallenge}
-            onGoDeeper={handleGoDeeper}
-            onAskForEvidence={handleAskForEvidence}
-            onReviseProposition={handleReviseProposition}
-          />
-        )}
-        {view === 'queue' && (
-          <IdeaListView
-            scope="crit"
-            inquiries={inquiries}
-            selectedId={selectedInquiryId}
-            onSelect={setSelectedInquiryId}
-            onAccept={handleAccept}
-            onChallenge={handleChallenge}
-            onGoDeeper={handleGoDeeper}
-            onAskForEvidence={handleAskForEvidence}
-            onReviseProposition={handleReviseProposition}
-          />
-        )}
-        {view === 'activity' && (
-          <ActivityView activity={activity} onOpenInquiry={openInquiry} />
-        )}
-        {view === 'audit' && (
-          <IdeaListView
-            scope="history"
-            inquiries={inquiries}
-            selectedId={selectedInquiryId}
-            onSelect={setSelectedInquiryId}
-            onAccept={handleAccept}
-            onChallenge={handleChallenge}
-            onGoDeeper={handleGoDeeper}
-            onAskForEvidence={handleAskForEvidence}
-            onReviseProposition={handleReviseProposition}
-          />
-        )}
-      </main>
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+          {view === 'overview' && (
+            <OverviewView
+              agents={agents}
+              inquiries={inquiries}
+              activity={activity}
+              onOpenInquiry={openInquiry}
+              onGoToActivity={() => setView('activity')}
+              onStartInquiry={() => {
+                setRevisionSeed(undefined);
+                setInquiryDialogOpen(true);
+              }}
+            />
+          )}
+          {view === 'inquiries' && (
+            <IdeasView
+              inquiries={inquiries}
+              selectedId={selectedInquiryId}
+              onSelect={setSelectedInquiryId}
+              onStartInquiry={() => {
+                setRevisionSeed(undefined);
+                setInquiryDialogOpen(true);
+              }}
+              onAccept={handleAccept}
+              onChallenge={handleChallenge}
+              onGoDeeper={handleGoDeeper}
+              onAskForEvidence={handleAskForEvidence}
+              onReviseProposition={handleReviseProposition}
+            />
+          )}
+          {view === 'queue' && (
+            <IdeaListView
+              scope="crit"
+              inquiries={inquiries}
+              selectedId={selectedInquiryId}
+              onSelect={setSelectedInquiryId}
+              onAccept={handleAccept}
+              onChallenge={handleChallenge}
+              onGoDeeper={handleGoDeeper}
+              onAskForEvidence={handleAskForEvidence}
+              onReviseProposition={handleReviseProposition}
+            />
+          )}
+          {view === 'activity' && (
+            <ActivityView activity={activity} onOpenInquiry={openInquiry} />
+          )}
+          {view === 'audit' && (
+            <IdeaListView
+              scope="history"
+              inquiries={inquiries}
+              selectedId={selectedInquiryId}
+              onSelect={setSelectedInquiryId}
+              onAccept={handleAccept}
+              onChallenge={handleChallenge}
+              onGoDeeper={handleGoDeeper}
+              onAskForEvidence={handleAskForEvidence}
+              onReviseProposition={handleReviseProposition}
+            />
+          )}
+        </main>
 
-      <StartInquiryDialog
-        open={inquiryDialogOpen}
-        onOpenChange={setInquiryDialogOpen}
-        onSubmit={handleStartInquiry}
-        initialProposition={revisionSeed}
-      />
-    </div>
+        <StartInquiryDialog
+          open={inquiryDialogOpen}
+          onOpenChange={setInquiryDialogOpen}
+          onSubmit={handleStartInquiry}
+          initialProposition={revisionSeed}
+        />
+      </div>
+    </>
   );
 }
