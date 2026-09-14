@@ -28,7 +28,7 @@ export function NavRail({ active, onSelect, ideaCount, critCount }: NavRailProps
     <nav
       aria-label="Primary"
       className="border-stroke-divider flex h-full w-52 shrink-0 flex-col border-r px-6 py-8">
-      <div className="paragraph-regular-primary text-fg-primary mb-10 tracking-tight">
+      <div className="font-headings text-fg-primary mb-10 text-lg leading-6 font-normal tracking-tight">
         Hephwerk
       </div>
 
