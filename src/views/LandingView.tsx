@@ -20,7 +20,7 @@ export function LandingView({ onExplore }: LandingViewProps) {
         'fixed inset-0 z-50 flex flex-col items-center justify-center gap-9 bg-black transition-opacity duration-300 ease-out',
         exiting ? 'pointer-events-none opacity-0' : 'opacity-100',
       )}>
-      <h1 className="font-sans text-[clamp(3rem,9vw,7rem)] leading-none font-light tracking-[-0.03em] text-white">
+      <h1 className="font-headings text-[clamp(3rem,9vw,7rem)] leading-none font-normal tracking-[-0.02em] text-white">
         Hephwerk
       </h1>
       <button

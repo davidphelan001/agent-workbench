@@ -177,7 +177,9 @@ function StatisticValue({
     <div data-slot="statistic-value" className={layoutClass} {...props}>
       <span
         className={cn(
-          'text-fg-primary [word-break:break-word] whitespace-nowrap',
+          // font-sans! forces Inter regardless of size tier — these are data
+          // digits, not headline text, and need to stay unambiguously legible.
+          'text-fg-primary [word-break:break-word] whitespace-nowrap font-sans!',
           'group-data-[size=xl]/statistic:display-d1-regular',
           'group-data-[size=lg]/statistic:display-d2-regular',
           'group-data-[size=default]/statistic:display-d3-regular',

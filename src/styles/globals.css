@@ -12,6 +12,32 @@
     src: url('/fonts/material-symbols-sharp.woff2') format('woff2');
   }
 
+  /* Brand display face — used for headlines and the landing wordmark only;
+     body copy stays on Inter for readability. */
+  @font-face {
+    font-family: 'Redaction';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/Redaction-Regular.woff2') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Redaction';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/Redaction-Bold.woff2') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Redaction';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/Redaction-Italic.woff2') format('woff2');
+  }
+
   .material-symbols-sharp {
     font-family: 'Material Symbols Sharp';
     font-weight: normal;
@@ -34,8 +60,8 @@
 
 @theme inline {
   /** Font Tokens */
-  --font-display: 'Inter', sans-serif;
-  --font-headings: 'Inter', sans-serif;
+  --font-display: 'Redaction', serif;
+  --font-headings: 'Redaction', serif;
   --font-paragraph: 'Inter', sans-serif;
   --font-code-text: 'Roboto Mono', monospace;
   --font-weight-300: 300;
@@ -808,36 +834,40 @@
  * Declared as `@utility` (not plain `@layer utilities` rules) so they remain
  * variant-capable in Tailwind v4 — e.g. `group-data-[size=lg]/accordion:headings-h3-regular`.
  */
+/* h1–h3 and the display sizes carry the brand face (Redaction) — true
+   headlines and page/section titles. h4 stays on Inter: it also styles
+   working content (constellation nodes, stat digits) that needs to stay
+   plainly legible at small size. */
 @utility display-d1-regular {
-  @apply font-sans text-[56px] leading-[60px] font-light tracking-[-0.28px];
+  @apply font-headings text-[56px] leading-[60px] font-light tracking-[-0.28px];
 }
 
 @utility display-d2-regular {
-  @apply font-sans text-[48px] leading-[56px] font-light tracking-[-0.96px];
+  @apply font-headings text-[48px] leading-[56px] font-light tracking-[-0.96px];
 }
 
 @utility display-d3-regular {
-  @apply font-sans text-[40px] leading-[48px] font-light tracking-[-0.8px];
+  @apply font-headings text-[40px] leading-[48px] font-light tracking-[-0.8px];
 }
 
 @utility headings-h1-regular {
-  @apply font-sans text-3xl leading-10 font-normal tracking-[-0.128px];
+  @apply font-headings text-3xl leading-10 font-normal tracking-[-0.128px];
 }
 
 @utility headings-h2-semibold {
-  @apply font-sans text-2xl leading-8 font-semibold tracking-[-0.096px];
+  @apply font-headings text-2xl leading-8 font-semibold tracking-[-0.096px];
 }
 
 @utility headings-h2-regular {
-  @apply font-sans text-2xl leading-8 font-normal tracking-[-0.096px];
+  @apply font-headings text-2xl leading-8 font-normal tracking-[-0.096px];
 }
 
 @utility headings-h3-regular {
-  @apply font-sans text-xl leading-7 font-normal tracking-[0px];
+  @apply font-headings text-xl leading-7 font-normal tracking-[0px];
 }
 
 @utility headings-h3-semibold {
-  @apply font-sans text-xl leading-7 font-semibold tracking-[0px];
+  @apply font-headings text-xl leading-7 font-semibold tracking-[0px];
 }
 
 @utility headings-h4-regular {
