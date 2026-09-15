@@ -1,0 +1,72 @@
+import { minutesAgo } from '@/lib/time';
+import type { ActivityEvent } from '@/types/domain';
+
+export const initialActivity: ActivityEvent[] = [
+  {
+    id: 'act-1',
+    timestamp: minutesAgo(4),
+    agentId: 'planner',
+    type: 'task-started',
+    summary: 'Started interpreting: is it worth writing down assumptions before starting work?',
+    relatedInquiryId: 'seed-2',
+  },
+  {
+    id: 'act-2',
+    timestamp: minutesAgo(9),
+    agentId: 'reviewer',
+    type: 'uncertainty',
+    summary: 'Flagged unresolved pushback on the AI-organisation idea',
+    detail: 'Reviewer isn’t convinced the reframe fully resolves the tension between delegated execution and retained judgement.',
+    relatedInquiryId: 'seed-1',
+  },
+  {
+    id: 'act-3',
+    timestamp: minutesAgo(15),
+    agentId: 'research',
+    type: 'task-completed',
+    summary: 'Consulted 6 relevant perspectives: Human factors, Agentic AI & AI systems, Strategy, Organisation design, Service & systems design, Management theory',
+    relatedInquiryId: 'seed-1',
+  },
+  {
+    id: 'act-4',
+    timestamp: minutesAgo(18),
+    agentId: 'planner',
+    type: 'escalated',
+    summary: 'Synthesised perspectives into a strengthened framing — ready for your judgement',
+    relatedInquiryId: 'seed-1',
+  },
+  {
+    id: 'act-5',
+    timestamp: minutesAgo(21),
+    agentId: 'planner',
+    type: 'agent-requested',
+    summary: 'Asked Reviewer for a second pass on the AI-organisation idea',
+    involvedAgentId: 'reviewer',
+    relatedInquiryId: 'seed-1',
+  },
+  {
+    id: 'act-6',
+    timestamp: minutesAgo(25),
+    agentId: 'planner',
+    type: 'task-started',
+    summary: 'Started interpreting: could an AI-agent organisation handle most research, planning and execution?',
+    relatedInquiryId: 'seed-1',
+  },
+  {
+    id: 'act-7',
+    timestamp: minutesAgo(60 * 25),
+    agentId: 'planner',
+    type: 'human-decision',
+    summary: 'accepted the synthesis for "should personal work tools default to showing less, not more?"',
+    detail: 'Agreed — restraint is the harder design problem, and the more valuable one.',
+    relatedInquiryId: 'seed-3',
+  },
+  {
+    id: 'act-8',
+    timestamp: minutesAgo(60 * 26),
+    agentId: 'reviewer',
+    type: 'task-completed',
+    summary: 'Widened the lens across technology, people, economics, and governance',
+    relatedInquiryId: 'seed-3',
+  },
+];
